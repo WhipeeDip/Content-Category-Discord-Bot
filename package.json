@@ -1,0 +1,32 @@
+{
+  "name": "content-category-discord-bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "@google-cloud/language": "^2.0.0",
+    "async-limiter": "^1.0.0",
+    "bluebird": "^3.5.3",
+    "discord.js": "^11.4.2",
+    "dotenv": "^6.2.0",
+    "long": "^4.0.0",
+    "prism-media": "^0.0.3",
+    "request": "^2.88.0",
+    "safe-buffer": "^5.1.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WhipeeDip/Content-Category-Discord-Bot.git"
+  },
+  "author": "WhipeeDip",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/WhipeeDip/Content-Category-Discord-Bot/issues"
+  },
+  "homepage": "https://github.com/WhipeeDip/Content-Category-Discord-Bot#readme",
+  "description": ""
+}
