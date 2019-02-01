@@ -115,7 +115,7 @@ module.exports = function(discordClient) {
     const redditParseListing = async(url) => {
         console.log('parsing reddit post');
 
-        let jsonUrl = url + '.json';
+        let jsonUrl = url + '.json'; // grab json data from reddit link
         try {
             let requestResult = await promisifyRequest(jsonUrl);
             if (requestResult.error) {
@@ -131,6 +131,7 @@ module.exports = function(discordClient) {
                     return mercury;
                 }
 
+                // fields as observed by going to various reddit posts and appending /.json
                 let post = result[0].data.children[0].data;
                 let title = post.title;
                 let subreddit = post.subreddit_name_prefixed;
@@ -160,6 +161,8 @@ module.exports = function(discordClient) {
         }
     };
 
+    // automatically determines which parsing method to use
+    // output should match the mercury format
     const parseLink = async(url) => {
         if (redditRegex.exec(url) !== null) {
             return await redditParseListing(url);
@@ -189,6 +192,8 @@ module.exports = function(discordClient) {
             maxConfidence = undefined;
             maxCategory = undefined;
             classification.categories.forEach((category) => {
+                // use the highest confidence category to determine message
+
                 let name = category.name;
                 let confidence = category.confidence;
 
@@ -230,6 +235,7 @@ module.exports = function(discordClient) {
         let msgContent = msg.content;
         let originalChannel = msg.channel;
 
+        // grab EVERY URL in message
         let urls = [];
         let tmpArr = [];
         while ((tmpArr = httpRegex.exec(msgContent)) !== null) {
@@ -246,6 +252,7 @@ module.exports = function(discordClient) {
 
             console.log(msgContent);
 
+            // classify message text itself
             let textResult = await classifyContent(msgContent);
             if (textResult === undefined) {
                 return;
@@ -256,6 +263,7 @@ module.exports = function(discordClient) {
                 result = textResult;
             }
         } else {
+            // classify every single URL detected
             let urlTexts = [];
             try {
                 urlTexts = await Promise.map(urls, async (url) => {
@@ -303,11 +311,13 @@ module.exports = function(discordClient) {
             return;
         }
 
+        // don't want to move things that are already where they should be
         if (newChannel.id === originalChannel.id) {
             console.log('was from same channel');
             return;
         }
 
+        // delete old message, inform user, send new
         try {
             let user = msg.author;
 

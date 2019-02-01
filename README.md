@@ -8,5 +8,5 @@ Uses the Google Cloud Natural Language API and the Mercury Web Parser to classif
 3. `npm install`
 4. `npm start`
 
-# License
+## License
 MIT
