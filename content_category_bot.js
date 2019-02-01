@@ -268,6 +268,10 @@ module.exports = function(discordClient) {
             try {
                 urlTexts = await Promise.map(urls, async (url) => {
                     let mercuryObj = await parseLink(url);
+                    if (mercuryObj === undefined) {
+                        return null;
+                    }
+
                     let urlText = createArticlePlainText(mercuryObj);
                     return urlText;
                 });
@@ -278,7 +282,7 @@ module.exports = function(discordClient) {
                 }
 
                 await Promise.each(urlTexts, async (urlText) => {
-                    if (matched) {
+                    if (matched || urlText === null) {
                         return;
                     }
 
@@ -306,7 +310,7 @@ module.exports = function(discordClient) {
         }
 
         let newChannel = msg.guild.channels.find(channel => channel.name === newChannelName);
-        if (newChannel === undefined) {
+        if (newChannel == undefined) {
             console.error(`Could not find channel with name ${newChannelName}`);
             return;
         }

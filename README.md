@@ -1,4 +1,5 @@
 # Content-Category-Discord-Bot
+
 Uses the Google Cloud Natural Language API and the Mercury Web Parser to classify URLs and messages and move them to another channel as desired.
 
 ## Setup
@@ -9,4 +10,5 @@ Uses the Google Cloud Natural Language API and the Mercury Web Parser to classif
 4. `npm start`
 
 ## License
+
 MIT
