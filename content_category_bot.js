@@ -33,6 +33,9 @@ module.exports = function(discordClient) {
     const redditRegex = new RegExp(REDDIT_REGEX_STR, 'g');
 
     let categoryToChannel;
+    let informedMoved = true;
+    let ignoredChannels = {};
+    let ignoredRoles = [];
     const mercuryKey = process.env.MERCURY_API_KEY;
     const confidenceCutoff = process.env.CONFIDENCE_CUTOFF;
     const maxNlUnits = process.env.MAX_NL_UNITS;
@@ -232,6 +235,16 @@ module.exports = function(discordClient) {
             return;
         }
 
+        // if ignored channel, skip
+        if (ignoredChannels[msg.channel.name] !== undefined) {
+            return;
+        }
+
+        // if has ignored role(s), skip
+        if (msg.member.roles.some((ele) => ignoredRoles.includes(ele.name))) {
+            return;
+        }
+
         let msgContent = msg.content;
         let originalChannel = msg.channel;
 
@@ -326,7 +339,9 @@ module.exports = function(discordClient) {
             let user = msg.author;
 
             msg.delete();
-            originalChannel.send(util.format(MSG_REMOVED, user, newChannel));
+            if (informedMoved) {
+                originalChannel.send(util.format(MSG_REMOVED, user, newChannel));
+            }
 
             let confidencePercent = result.confidence * 100;
             await newChannel.send(util.format(MSG_NEW, confidencePercent, user, originalChannel, result.category));
@@ -366,6 +381,32 @@ module.exports = function(discordClient) {
         } else if (charsNonUrl <= 0) {
             console.error(CMD_CHARS_NON_RANGE);
             process.exit(1);
+        }
+
+        if (process.env.INFORM_MOVED !== undefined) {
+            informedMoved = process.env.informedMoved == 'true';
+        }
+
+        if (process.env.IGNORED_CHANNELS !== undefined && process.env.IGNORED_CHANNELS.length > 0) {
+            let splitStr = process.env.IGNORED_CHANNELS.split(';');
+            splitStr.forEach((channel) => {
+                if (channel.length === 0) {
+                    return;
+                }
+
+                ignoredChannels[channel] = true;
+            });
+        }
+
+        if (process.env.IGNORED_ROLES !== undefined && process.env.IGNORED_ROLES.length > 0) {
+            let splitStr = process.env.IGNORED_ROLES.split(';');
+            splitStr.forEach((role) => {
+                if (role.length === 0) {
+                    return;
+                }
+
+                ignoredRoles.push(role);
+            });
         }
 
         if (process.env.CATEGORY_CHANNEL_FILE === undefined) {
