@@ -4,6 +4,7 @@
   "main": "index.js",
   "dependencies": {
     "@google-cloud/language": "^2.0.0",
+    "@postlight/mercury-parser": "^2.0.0",
     "async-limiter": "^1.0.0",
     "bluebird": "^3.5.3",
     "discord.js": "^11.4.2",

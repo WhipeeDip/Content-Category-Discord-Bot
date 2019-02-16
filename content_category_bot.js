@@ -5,11 +5,11 @@
 
 const Promise = require('bluebird');
 const fs = require('fs');
-const request = require('request');
 const util = require('util');
 
 const language = require('@google-cloud/language');
 const languageClient = new language.LanguageServiceClient();
+const Mercury = require('@postlight/mercury-parser');
 const promisifyRequest = util.promisify(require('request'));
 
 // require() this and pass in the discord.js logged in client
@@ -22,11 +22,9 @@ module.exports = function(discordClient) {
     const CMD_MAX_NL_RANGE = 'MAX_NL_UNITS must be > 0.';
     const CMD_CONFIDENCE_NOT_FOUND = 'CONFIDENCE_CUTOFF was not found in your env vars.';
     const CMD_CONFIDENCE_RANGE = 'CONFIDENCE_CUTOFF must be > 0 and <= 1.';
-    const CMD_MERCURY_NOT_FOUND = 'MERCURY_API_KEY was not found in your env vars.';
     const CMD_CHARS_NON_NOT_FOUND = 'CHARS_NON_URL was not found in your env vars.';
     const CMD_CHARS_NON_RANGE = 'CHARS_NON_URL must be > 0.';
 
-    const MERCURY_API_URL = 'https://mercury.postlight.com/parser?url=';
     const HTTP_REGEX_STR = String.raw`https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)`;
     const httpRegex = new RegExp(HTTP_REGEX_STR, 'g');
     const REDDIT_REGEX_STR = String.raw`reddit.com/r/.*/comments/`;
@@ -36,7 +34,6 @@ module.exports = function(discordClient) {
     let informedMoved = true;
     let ignoredChannels = {};
     let ignoredRoles = [];
-    const mercuryKey = process.env.MERCURY_API_KEY;
     const confidenceCutoff = process.env.CONFIDENCE_CUTOFF;
     const maxNlUnits = process.env.MAX_NL_UNITS;
     const charsNonUrl = process.env.CHARS_NON_URL;
@@ -86,28 +83,9 @@ module.exports = function(discordClient) {
     const mercuryParseArticle = async (url) => {
         console.log(`parsing article ${url}`);
 
-        const options =  {
-            'url': MERCURY_API_URL + url,
-            'headers': {
-                'Content-Type': 'application/json',
-                'x-api-key': mercuryKey
-            }
-        };
-
         try {
-            let requestResult = await promisifyRequest(options);
-            if (requestResult.error) {
-                console.error(requestResult.error);
-                return undefined;
-            }
-
-            if (requestResult.statusCode === 200) {
-                let result = JSON.parse(requestResult.body);
-                return result;
-            } else {
-                console.error('did not get HTTP 200');
-                return undefined;
-            }
+            let result = await Mercury.parse(url);
+            return result;
         } catch (err) {
             console.error(err);
             return undefined;
@@ -367,11 +345,6 @@ module.exports = function(discordClient) {
             process.exit(1);
         } else if (maxNlUnits <= 0) {
             console.error(CMD_MAX_NL_RANGE);
-            process.exit(1);
-        }
-
-        if (mercuryKey === undefined) {
-            console.error(CMD_MERCURY_NOT_FOUND);
             process.exit(1);
         }
 
