@@ -1,5 +1,7 @@
 # Content-Category-Discord-Bot
 
+### Currently not maintained!
+
 Uses the Google Cloud Natural Language API to classify URLs and messages and move them to another channel as desired.
 
 ## Setup
